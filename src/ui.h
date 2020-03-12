@@ -8,6 +8,11 @@
 
 
 typedef struct{
+  int h, w;
+  uint32_t color;
+}WinData;
+
+typedef struct{
   int   h, w, x, y, depth;
   EventList    events;
   void*          data;
@@ -30,7 +35,11 @@ void addWindow      (WindowList *, Window);
 void runWindowEvents(WindowList *, EventList*);
 void drawGUI        (SDL_Surface*, WindowList*);
 
+Window newBlankWindow(int, int, int, int, int, uint32_t);
+
 WindowList newWindowList(int);
+
+void cleanupWindow(Window);
 
 
 
