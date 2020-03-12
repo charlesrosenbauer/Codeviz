@@ -9,11 +9,11 @@
 
 typedef struct{
   int   h, w, x, y, depth;
-  EventList events;
-  void*       data;
-  void   (* update)(void*, EventList*);
-  void   (*   draw)(void*);
-  void   (*cleanup)(void*);
+  EventList    events;
+  void*          data;
+  void      (* update)(void*, EventList*);
+  uint32_t* (*   draw)(void*);
+  void      (*cleanup)(void*);
 }Window;
 
 
@@ -26,11 +26,13 @@ typedef struct{
 
 
 
-void addWindow      (WindowList*, Window);
-void runWindowEvents(WindowList*, EventList*);
-
+void addWindow      (WindowList *, Window);
+void runWindowEvents(WindowList *, EventList*);
+void drawGUI        (SDL_Surface*, WindowList*);
 
 WindowList newWindowList(int);
+
+
 
 
 
