@@ -87,6 +87,40 @@ void addWindow(WindowList* list, Window w){
     free(tmp);
   }
   // For now we just insert wherever the hell. Later, we'll want to sort this.
-  list->windows[list->size] = w;
+  int copymode = 0;
+  Window tmp;
+  for(int i = 0; i < list->size; i++){
+    if(!copymode){
+        if(list->windows[i].depth > w.depth){
+          tmp = list->windows[i];
+          list->windows[i] = w;
+          copymode = 1;
+        }
+    }else{
+        Window othertmp = list->windows[i];
+        list->windows[i] = tmp;
+        tmp = othertmp;
+    }
+  }
+  if(!copymode) tmp = w;
+
+  list->windows[list->size] = tmp;
   list->size++;
+}
+
+
+
+
+void printWindow(Window w){
+  printf("X:%i Y:%i H:%i W:%i D:%i [U:%lu] [D:%lu] [C:%lu]\n",
+            w.x, w.y, w.h, w.w, w.depth, w.update, w.draw, w.cleanup);
+}
+
+
+void printWindowList(WindowList* wl){
+  printf("WINDOWLIST: [CP:%i] [SZ:%i] [AW:%i] [HW:%i] [MX:%i] [MY:%i]\n",
+            wl->capacity, wl->size, wl->activeWindow, wl->hoverWindow, wl->mx, wl->my);
+  for(int i = 0; i < wl->size; i++){
+    printWindow(wl->windows[i]);
+  }
 }

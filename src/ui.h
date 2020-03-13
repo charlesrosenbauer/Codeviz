@@ -42,7 +42,7 @@ WindowList newWindowList(int);
 void cleanupWindow(Window);
 
 
-
+void printWindowList(WindowList*);
 
 
 
