@@ -22,6 +22,19 @@ uint32_t* drawColorWindow(void* data){
 }
 
 
+void blankWindowUpdate(void* data, EventList* events){
+  WinData* d = (WinData*)data;
+  for(int i = 0; i < events->size; i++){
+    if      (events->events[i].type == HVR_EVENT){
+      d->color = ~d->color;
+    }else if(events->events[i].type == ACT_EVENT){
+      d->color = 0xffffff;
+    }
+  }
+  clearEventList(events);
+}
+
+
 Window newBlankWindow(int x, int y, int h, int w, int depth, uint32_t color){
   Window ret;
   ret.h = h;
@@ -32,13 +45,13 @@ Window newBlankWindow(int x, int y, int h, int w, int depth, uint32_t color){
   ret.events = makeEventList(64);
   ret.data   = malloc(sizeof(WinData));
   ret.draw   = drawColorWindow;
+  ret.update = blankWindowUpdate;
   WinData* data = (WinData*)ret.data;
   data->h = h;
   data->w = w;
   data->color = color;
   return ret;
 }
-
 
 
 
@@ -72,6 +85,8 @@ WindowList newWindowList(int capacity){
   ret.windows  = malloc(sizeof(Window) * capacity);
   ret.capacity = capacity;
   ret.size     = 0;
+  ret.activeWindow = -1;
+  ret.hoverWindow  = -1;
   return ret;
 }
 
@@ -106,6 +121,67 @@ void addWindow(WindowList* list, Window w){
 
   list->windows[list->size] = tmp;
   list->size++;
+}
+
+
+int findHover(WindowList* windows){
+  for(int i = 0; i < windows->size; i++){
+    Window w = windows->windows[i];
+    int   mx = windows->mx;
+    int   my = windows->my;
+    if((mx >= w.x) && (my >= w.y) && (mx < (w.x + w.w)) && (my < (w.y + w.h))){
+      return i;
+    }
+  }
+  return -1;
+}
+
+
+
+void runWindowEvents(WindowList* windows, EventList* events){
+  Event hover = {
+    .type = HVR_EVENT,
+    .event.hvr_event.mx = windows->mx,
+    .event.hvr_event.my = windows->my
+  };
+  Event active = {
+    .type = ACT_EVENT,
+    .event.act_event.mx = windows->mx,
+    .event.act_event.my = windows->my
+  };
+
+  for(int i = 0; i < events->size; i++){
+    if(events->events[i].type == SDL_EVENT){
+      Event e = events->events[i];
+      if(e.event.sdl_event.type == SDL_MOUSEMOTION){
+        windows->mx = e.event.sdl_event.motion.x;
+        windows->my = e.event.sdl_event.motion.y;
+
+        // Update hover
+        int newhover = findHover(windows);
+        if(windows->hoverWindow != newhover){
+          windows->hoverWindow = newhover;
+          if(windows->hoverWindow  >= 0) insertEventList(&windows->windows[windows->hoverWindow ].events, hover);
+        }
+      }else if(e.event.sdl_event.type == SDL_MOUSEBUTTONDOWN){
+        // Update active
+        int newactive = windows->hoverWindow;
+        if(windows->activeWindow != newactive){
+          windows->activeWindow = newactive;
+          if(windows->activeWindow >= 0) insertEventList(&windows->windows[windows->activeWindow].events, active);
+        }
+      }
+
+      if(windows->activeWindow >= 0){
+        insertEventList(&windows->windows[windows->activeWindow].events, e);
+      }
+    }
+  }
+
+  for(int i = 0; i < windows->size; i++){
+    Window w = windows->windows[i];
+    w.update(w.data, &w.events);
+  }
 }
 
 

@@ -12,11 +12,21 @@ typedef struct{
 }GUI_Event;
 
 typedef struct{
+  int mx, my;
+}HVR_Event;
+
+typedef struct{
+  int mx, my;
+}ACT_Event;
+
+typedef struct{
   union{
     SDL_Event sdl_event;
     GUI_Event gui_event;
+    HVR_Event hvr_event;
+    ACT_Event act_event;
   }event;
-  enum{SDL_EVENT, GUI_EVENT} type;
+  enum{SDL_EVENT, GUI_EVENT, HVR_EVENT, ACT_EVENT} type;
 }Event;
 
 typedef struct{

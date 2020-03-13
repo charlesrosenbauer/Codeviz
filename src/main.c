@@ -29,6 +29,8 @@ int main(){
       }
     }
 
+    runWindowEvents(&windows, &events);
+
     clearEventList(&events);
     drawGUI(screen, &windows);
     SDL_Flip(screen);
