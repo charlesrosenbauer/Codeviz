@@ -8,13 +8,12 @@
 
 typedef struct{
 	char*     text;
-	uint32_t* pixels;
 	int       h, w, textsize, lineoffset;
 }CodeWindow;
 
 
 
-Window* makeCodeWindow(char*, int, int, int, int);
+Window newCodeWindow(char*, int, int, int, int, int, int, int);
 
 
 
