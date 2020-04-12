@@ -14,8 +14,18 @@ uint32_t* renderCode(void* data){
 
 	int size = w->h * w->w;
 	uint32_t* pix = malloc(sizeof(uint32_t) * size);
-	for(int i = 0; i < size; i++){
-		pix[i] = 0xff000000;
+	{
+		int ix = 0;
+		for(int i = 0; i < w->h; i++){
+			for(int j = 0; j < w->w; j++){
+				if((i == 0) || (i == (w->h-1)) || (j == 0) || (j == (w->w-1))){
+					pix[ix] = 0xffffffff;
+				}else{
+					pix[ix] = 0xff000000;
+				}
+				ix++;
+			}
+		}
 	}
 
 	int column = 0;
@@ -32,15 +42,15 @@ uint32_t* renderCode(void* data){
 			column ++;
 		}else{
 			column++;
-			color = 0xffffffff;
+			color = 0xff777777;
 		}
 
-		if((line >= w->lineoffset) && (column < w->w)){
-			int ix = (w->w * (line - w->lineoffset)) + column;
+		if((line >= w->lineoffset) && (column < (w->w-4))){
+			int ix = (w->w * ((line + 2) - w->lineoffset)) + column + 2;
 			pix[ix] = color;
 		}
 
-		if((line - w->lineoffset) >= w->h) return pix;
+		if((line - w->lineoffset) >= (w->h-4)) return pix;
 	}
 
 	return pix;
