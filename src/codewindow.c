@@ -57,6 +57,40 @@ uint32_t* renderCode(void* data){
 }
 
 
+uint32_t* renderPairs(void* data){
+	CodeWindow* w = data;
+
+	int size = w->h * w->w;
+	uint32_t* pix = malloc(sizeof(uint32_t) * size);
+	{
+		int ix = 0;
+		for(int i = 0; i < w->h; i++){
+			for(int j = 0; j < w->w; j++){
+				if((i == 0) || (i == (w->h-1)) || (j == 0) || (j == (w->w-1))){
+					pix[ix] = 0xffffffff;
+				}else{
+					pix[ix] = 0xff000000;
+				}
+				ix++;
+			}
+		}
+	}
+
+	char prev = w->text[w->textsize-1];
+	for(int i = 0; i < w->textsize; i++){
+		uint32_t x = (uint8_t)prev;
+		uint32_t y = (uint8_t)w->text[i];
+		if((x < (w->w-4)) && (y < (w->h-4))){
+			int ix = ((y+2) * (w->h)) + x + 2;
+			pix[ix] = 0xff777777;
+		}
+
+		prev = y;
+	}
+	return pix;
+}
+
+
 
 int countLines(char* text, int size){
 	int lct = 0;
