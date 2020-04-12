@@ -26,16 +26,20 @@ void blankWindowUpdate(void* data, EventList* events){
   WinData* d = (WinData*)data;
   for(int i = 0; i < events->size; i++){
     if      (events->events[i].type == HVR_EVENT){
-      if(events->events[i].event.hvr_event.isHover )
-        d->color = ~d->color;
+      d->isHover  = events->events[i].event.hvr_event.isHover;
     }else if(events->events[i].type == ACT_EVENT){
-      if(events->events[i].event.act_event.isActive)
-        d->color = 0xffffff;
-      else
-        d->color = 0x000000;
-
+      d->isActive = events->events[i].event.act_event.isActive;
     }
   }
+  if(d->isHover){
+    d->color = ~d->color;
+  }
+  if(d->isActive){
+    d->color = 0xffffff;
+  }else if(!d->isHover){
+    d->color = 0x000000;
+  }
+
   clearEventList(events);
 }
 
@@ -142,12 +146,6 @@ int findHover(WindowList* windows){
 }
 
 
-/*
-  NOTE:
-
-  Old hover and old active should probably be alerted that they are no longer
-  hover/active.
-*/
 void runWindowEvents(WindowList* windows, EventList* events){
   Event hover = {
     .type = HVR_EVENT,

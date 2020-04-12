@@ -10,6 +10,7 @@
 typedef struct{
   int h, w;
   uint32_t color;
+  int isActive, isHover;
 }WinData;
 
 typedef struct{
