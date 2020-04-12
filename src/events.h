@@ -12,11 +12,11 @@ typedef struct{
 }GUI_Event;
 
 typedef struct{
-  int mx, my;
+  int mx, my, isHover;
 }HVR_Event;
 
 typedef struct{
-  int mx, my;
+  int mx, my, isActive;
 }ACT_Event;
 
 typedef struct{

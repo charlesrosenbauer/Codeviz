@@ -26,9 +26,14 @@ void blankWindowUpdate(void* data, EventList* events){
   WinData* d = (WinData*)data;
   for(int i = 0; i < events->size; i++){
     if      (events->events[i].type == HVR_EVENT){
-      d->color = ~d->color;
+      if(events->events[i].event.hvr_event.isHover )
+        d->color = ~d->color;
     }else if(events->events[i].type == ACT_EVENT){
-      d->color = 0xffffff;
+      if(events->events[i].event.act_event.isActive)
+        d->color = 0xffffff;
+      else
+        d->color = 0x000000;
+
     }
   }
   clearEventList(events);
@@ -137,17 +142,36 @@ int findHover(WindowList* windows){
 }
 
 
+/*
+  NOTE:
 
+  Old hover and old active should probably be alerted that they are no longer
+  hover/active.
+*/
 void runWindowEvents(WindowList* windows, EventList* events){
   Event hover = {
     .type = HVR_EVENT,
     .event.hvr_event.mx = windows->mx,
-    .event.hvr_event.my = windows->my
+    .event.hvr_event.my = windows->my,
+    .event.hvr_event.isHover = 1
   };
   Event active = {
     .type = ACT_EVENT,
     .event.act_event.mx = windows->mx,
-    .event.act_event.my = windows->my
+    .event.act_event.my = windows->my,
+    .event.act_event.isActive = 1
+  };
+  Event unhover = {
+    .type = HVR_EVENT,
+    .event.hvr_event.mx = windows->mx,
+    .event.hvr_event.my = windows->my,
+    .event.hvr_event.isHover = 0
+  };
+  Event inactive = {
+    .type = ACT_EVENT,
+    .event.act_event.mx = windows->mx,
+    .event.act_event.my = windows->my,
+    .event.act_event.isActive = 0
   };
 
   for(int i = 0; i < events->size; i++){
@@ -160,6 +184,7 @@ void runWindowEvents(WindowList* windows, EventList* events){
         // Update hover
         int newhover = findHover(windows);
         if(windows->hoverWindow != newhover){
+          if(windows->hoverWindow  >= 0) insertEventList(&windows->windows[windows->hoverWindow ].events, unhover);
           windows->hoverWindow = newhover;
           if(windows->hoverWindow  >= 0) insertEventList(&windows->windows[windows->hoverWindow ].events, hover);
         }
@@ -167,6 +192,7 @@ void runWindowEvents(WindowList* windows, EventList* events){
         // Update active
         int newactive = windows->hoverWindow;
         if(windows->activeWindow != newactive){
+          if(windows->activeWindow >= 0) insertEventList(&windows->windows[windows->activeWindow].events, inactive);
           windows->activeWindow = newactive;
           if(windows->activeWindow >= 0) insertEventList(&windows->windows[windows->activeWindow].events, active);
         }
